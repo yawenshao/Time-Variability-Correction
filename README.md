@@ -1,6 +1,8 @@
 # Time-Variability-Correction
 
-This is the initial release of the Python scripts and relevant data used to build the Time Variability Correction model, conduct the analysis, and create figures for the manuscript: Yawen Shao, Craig H. Bishop, Sanaa Hobeichi, Nidhi Nishant, Gab Abramowitz, Steven Sherwood. Time Variability Correction of CMIP6 Climate Change Projections. Accepted in Journal of Advances in Modelling Earth Systems.
+This repository includes the Python scripts and relevant data used to build the Time Variability Correction model, conduct the analysis, and create figures for the manuscript: Yawen Shao, Craig H. Bishop, Sanaa Hobeichi, Nidhi Nishant, Gab Abramowitz, Steven Sherwood. Time Variability Correction of CMIP6 Climate Change Projections. Accepted in Journal of Advances in Modelling Earth Systems. 
+
+Cite DOI: 10.5281/zenodo.10212122
 
 ## Script Contents Overview:
 ### Time Variability Correction model and verification metrics
@@ -19,7 +21,7 @@ This is the initial release of the Python scripts and relevant data used to buil
 
 ‘Figure6_global_aggregate_scatter_plots.py’: calculates and plots globally weighted absolute difference between TVC and mean-corrected raw variance at each time scale (Figure 6).
 
-‘Figure7_one_model_lat_aggregate_heatmap.py’: computes and plots the absolute difference between ERA5 reanalysis and mean-corrected raw model in time-scale-dependent variance averaged at each latitude.
+‘Figure7_one_model_lat_aggregate_heatmap.py’: computes and plots the absolute difference between ERA5 reanalysis and mean-corrected raw model in time-scale-dependent variance averaged at each latitude. Data used to plot Figure 7 are on Zenodo (10.5281/zenodo.10212122).
 
 ‘Figure8_S8_global_map_plot_6plots.py’: plots the difference in variance and lag correlations between TVC and mean-corrected raw predictions across the globe.
 
