@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the associated article and Zenodo record."
+title: "Time Variability Correction of CMIP6 Climate Change Projections"
+authors:
+  - family-names: Shao
+    given-names: Yawen
+  - family-names: Bishop
+    given-names: Craig H.
+  - family-names: Hobeichi
+    given-names: Sanaa
+  - family-names: Nishant
+    given-names: Nidhi
+  - family-names: Abramowitz
+    given-names: Gab
+  - family-names: Sherwood
+    given-names: Steven
+doi: 10.5281/zenodo.10212122
+url: "https://github.com/yawenshao/Time-Variability-Correction"
