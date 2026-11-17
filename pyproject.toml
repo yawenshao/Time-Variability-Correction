@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tvc-climate"
+version = "0.1.0"
+description = "Time Variability Correction for climate-model time series"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Yawen Shao" }]
+dependencies = ["numpy>=1.23", "pandas>=1.5", "scipy>=1.9"]
+
+[project.optional-dependencies]
+demo = ["matplotlib>=3.6"]
+research = ["xarray>=2023.1", "matplotlib>=3.6", "seaborn>=0.12"]
+test = ["pytest>=7.0"]
+
+[tool.setuptools]
+py-modules = ["TVC_class", "statistics_tool"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
