@@ -1,19 +1,12 @@
 """Run TVC on synthetic daily time series without external climate data."""
+
 from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
-from TVC_class import TVC
 
-
-def generate_ar1(length: int, coefficient: float, seed: int) -> np.ndarray:
-    """Generate a reproducible, zero-mean AR(1) series."""
-    rng = np.random.default_rng(seed)
-    innovations = rng.normal(size=length)
-    values = np.empty(length, dtype=float)
-    values[0] = innovations[0]
-    for index in range(1, length):
-        values[index] = coefficient * values[index - 1] + innovations[index]
-    return values
+from tvc import TVC, spin_up
+from tvc.synthetic import generate_ar1
 
 
 def main() -> None:
@@ -28,9 +21,7 @@ def main() -> None:
     corrected_components = tvc.TVC_postprocess()
     corrected_series = np.real_if_close(corrected_components.sum(axis=1))
 
-    # The rolling decomposition omits its initial spin-up interval.
-    spin_up = sum(scales) - len(scales)
-    raw_aligned = model_validation[spin_up:]
+    raw_aligned = model_validation[spin_up(scales) :]
 
     output_dir = Path("outputs")
     output_dir.mkdir(exist_ok=True)

@@ -10,6 +10,10 @@ dist/
 venv/
 env/
 outputs/
+Figures/
+.mypy_cache/
+.ruff_cache/
+.streamlit/secrets.toml
 .vscode/
 .idea/
 .DS_Store

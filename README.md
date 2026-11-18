@@ -4,7 +4,7 @@
 
 **A Python implementation of Time Variability Correction for climate-model time series.**
 
-This repository contains the TVC method, verification metrics, a case-study workflow, and research scripts used in Shao et al. (2024). TVC aims to improve the representation of temporal variability in climate-model projections across multiple time scales.
+This repository contains the TVC method, verification metrics, an interactive demo dashboard, and the research scripts used in Shao et al. (2024). TVC aims to improve the representation of temporal variability in climate-model projections across multiple time scales.
 
 ## Scientific background
 
@@ -14,24 +14,24 @@ For methodology, assumptions, evaluation and scientific context, consult:
 
 > Shao, Y., Bishop, C. H., Hobeichi, S., Nishant, N., Abramowitz, G., & Sherwood, S. (2024). *Time variability correction of CMIP6 climate change projections*. Journal of Advances in Modeling Earth Systems. https://doi.org/10.1029/2023MS003640
 
-## Repository guide
+## Repository layout
 
-| File | Purpose |
+| Path | Purpose |
 |---|---|
-| `TVC_class.py` | Core `TVC` class, including multiscale decomposition and covariance-based correction. |
-| `statistics_tool.py` | Verification metrics, including variance, lag correlation and warm-spell duration index calculations. |
-| `TVC_case_study.py` | Case-study workflow demonstrating use of the core class and metrics. |
-| `Figure*.py`, `FigureS*.py` | Scripts for generating figures and supplementary analyses in the paper. |
-| `AR1_standard_Gaussian_*.py` | Synthetic AR(1) experiments used in the research analysis. |
-| `Data/` | Selected input data and intermediate results used by the research scripts. |
-| `examples/` | Lightweight synthetic-data example, without the research data dependency. |
-| `tests/` | Focused automated tests for selected numerical operations. |
+| `src/tvc/core.py` | Core `TVC` class: multiscale decomposition and covariance-based correction. |
+| `src/tvc/metrics.py` | `statistics` (alias `Statistics`): variance, lag correlation and warm-spell duration index. |
+| `src/tvc/constants.py`, `io.py`, `plotting.py`, `synthetic.py` | Shared constants, `Data/` path helpers, figure styling, AR(1) generator. |
+| `app/` | Streamlit + Plotly demo dashboard. |
+| `scripts/paper/` | Figure and analysis scripts from the paper (see its [README](scripts/paper/README.md)). |
+| `examples/` | Lightweight synthetic-data example with no research-data dependency. |
+| `Data/` | Selected input data and intermediate results used by the research scripts and the dashboard. |
+| `tests/` | Unit tests and a regression test on the shipped site case study. |
 
-The original research scripts and data remain in their existing locations to preserve the published workflow. The synthetic example is a quick software demonstration, not a replacement for the paper's experiments.
+The TVC and metric implementations are unchanged from the published version; this release reorganises the repository around them.
 
 ## Installation
 
-Python 3.9 or later is recommended.
+Python 3.9 or later is required.
 
 ```bash
 git clone https://github.com/yawenshao/Time-Variability-Correction.git
@@ -39,75 +39,85 @@ cd Time-Variability-Correction
 python -m pip install -e .
 ```
 
-For tests and the synthetic demonstration:
+Optional extras:
+
+| Extra | Installs | Use |
+|---|---|---|
+| `demo` | matplotlib | `examples/synthetic_demo.py` |
+| `dashboard` | streamlit, plotly, xarray, netCDF4 | `app/streamlit_app.py` |
+| `research` | xarray, netCDF4, matplotlib, seaborn, cartopy | `scripts/paper/` |
+| `test` | pytest, pytest-cov | test suite |
+| `dev` | all of the above plus ruff, mypy, pre-commit | development |
 
 ```bash
-python -m pip install -e ".[test,demo]"
+python -m pip install -e ".[dashboard]"
 ```
 
-Some paper-reproduction scripts additionally use xarray, matplotlib, seaborn and other scientific Python packages. Install the optional research dependencies with:
+## Demo dashboard
 
 ```bash
-python -m pip install -e ".[research]"
+python -m pip install -e ".[dashboard]"
+streamlit run app/streamlit_app.py
 ```
+
+It has four tabs:
+
+- **Site case study**: ERA5 versus any of 23 CMIP6 models at -37.5°, 144.5° (near Melbourne). TVC runs live, and the tab shows metric cards (variance, lag-1, 5-day lag, WSDI), the scale-by-scale covariance matrices for observations, raw and corrected series, variance by time scale, and time series per component. Switch between in-sample (as in the paper) and out-of-sample evaluation (fit on 1950–1981, apply to 1982–2014).
+- **Multi-model comparison**: an interactive Figure 3 plus a table of each model's percentage improvement towards ERA5.
+- **Global view**: maps and per-model box plots of percentage improvement for each scenario (Figures 4–5), and 1° TVC − raw difference maps (Figure 8 / S8).
+- **Synthetic playground**: sliders for AR(1) reference and model processes, showing out-of-sample variance by scale and the autocorrelation function.
 
 ## Quick start
 
-Run the self-contained synthetic demonstration:
-
-```bash
-python examples/synthetic_demo.py
-```
-
-The script generates synthetic daily time series, fits TVC using a synthetic observational reference and model training series, and applies the fitted correction to an independent model series. It saves a diagnostic plot in `outputs/`. No external climate data are needed.
-
-This example demonstrates the software workflow; it is not a scientific validation or reproduction of the published CMIP6 experiment.
-
-## Core API
-
-The current implementation accepts one-dimensional time series:
-
 ```python
-from TVC_class import TVC
-
-scales = [365, 183, 92, 46, 23, 12, 6, 3, 2]
+from tvc import TVC, DEFAULT_SCALES, spin_up
 
 model = TVC(
     obs=observational_training_series,
     raw_train=model_training_series,
     raw_val=model_validation_series,
-    scales=scales,
+    scales=DEFAULT_SCALES,  # [365, 183, 92, 46, 23, 12, 6, 3, 2]
 )
 
 corrected_components = model.TVC_postprocess()
 corrected_series = corrected_components.sum(axis=1)
+# The first spin_up(DEFAULT_SCALES) samples of the input are not returned.
 ```
 
-The observation and model training series must have matching lengths. Choose temporal scales appropriate to the sampling frequency and scientific question. The rolling decomposition omits an initial spin-up segment determined by the selected scales; consult `TVC_class.py` when aligning corrected output with the original time coordinate.
+The observation and model training series must have matching lengths. Choose temporal scales appropriate to the sampling frequency and scientific question. The legacy imports `from TVC_class import TVC` and `from statistics_tool import statistics` still work but emit a `DeprecationWarning`.
+
+Self-contained synthetic example (saves a plot to `outputs/`):
+
+```bash
+python -m pip install -e ".[demo]"
+python examples/synthetic_demo.py
+```
 
 ## Reproducing the paper
 
-The root-level `Figure*.py` and `FigureS*.py` scripts document the analyses and plotting workflows used in the article. They may require larger datasets, intermediate files and additional packages listed in their imports. The files in `Data/` are selected research assets and may not include every input used in the study.
+See [`scripts/paper/README.md`](scripts/paper/README.md) for the script-to-figure mapping and for inputs that are not included in `Data/`.
 
 - Zenodo software/data record: https://doi.org/10.5281/zenodo.10212122
 - Research article: https://doi.org/10.1029/2023MS003640
 
-## Tests
-
-Run the focused unit tests with:
+## Development
 
 ```bash
-python -m pytest
+python -m pip install -e ".[dev]"
+pre-commit install
+python -m pytest            # unit + site regression tests
+python -m pytest app        # dashboard smoke test
+ruff check .
 ```
 
-These tests cover selected numerical operations and array behaviour. They do not constitute complete validation of every scientific use case or reproduce all paper results.
+The tests cover selected numerical operations and a site regression; they do not constitute complete validation of every scientific use case.
 
 ## Limitations
 
 - TVC is a research method; suitability depends on the data and intended application.
 - Users should check temporal alignment, missing values, sampling frequency and scale selection.
 - The core class operates on one-dimensional time series. It does not provide a complete CF-compliant NetCDF ingestion, metadata-preservation or climate-data publication pipeline.
-- The synthetic example is a software demonstration, not evidence that TVC improves every variable, region or climate model.
+- The synthetic example and dashboard are demonstrations, not evidence that TVC improves every variable, region or climate model.
 
 ## Citation
 

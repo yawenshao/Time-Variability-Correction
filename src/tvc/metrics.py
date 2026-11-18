@@ -210,3 +210,6 @@ class statistics:
         data_flag_final = pd.DataFrame(data_flag_final.to_numpy(), index=self.dates) 
 
         return data_flag_final
+
+
+Statistics = statistics
